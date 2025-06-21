@@ -1,0 +1,17 @@
+{
+  "naive_best_ask": {
+    "total_cash": 1114103.36,
+    "avg_fill_px": 222.8207,
+    "filled": 5000
+  },
+  "twap": {
+    "total_cash": 678258.5,
+    "avg_fill_px": 222.8182,
+    "filled": 3044
+  },
+  "vwap": {
+    "total_cash": 1114103.36,
+    "avg_fill_px": 222.8207,
+    "filled": 5000
+  }
+}
