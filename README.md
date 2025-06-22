@@ -43,8 +43,6 @@ No proprietary libraries, no hidden dependencies, and no third‑party SaaS.
 ![image](https://github.com/user-attachments/assets/c3c2cfc4-2816-4899-9d95-7a60a3c2106c)
 
 
-> **Tip:** Store screenshots under `docs/screenshots/` so GitHub renders them automatically.
-
 ---
 
 ## 1  Repository Layout
