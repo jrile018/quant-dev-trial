@@ -24,6 +24,33 @@ No proprietary libraries, no hidden dependencies, and no third‑party SaaS.
 
 ---
 
+## ✅ Assignment Checklist (per prompt)
+
+| Requirement                             | Where Covered                                                                                |
+| --------------------------------------- | -------------------------------------------------------------------------------------------- |
+| **Approach description**                | See **§0 Executive Summary** + **§2 Solution Architecture**                                  |
+| **Tuning logic (grid‑search)**          | Detailed in **§4 Cost Function**                                                             |
+| **EC2 setup**                           | Step‑by‑step in **§8 AWS Deployment**                                                        |
+| **EC2 instance type used**              | Example uses **`t3.small`** (fits free‑tier‑like budget; `t3.micro` also works)              |
+| **Kafka/Zookeeper install steps**       | Bare‑metal script `scripts/start_local_kafka.sh` + Docker/Cloud‑Init snippets in **§5 & §8** |
+| **Commands to run Producer & Backtest** | Explicit CLI in **§6 Local Execution Walk‑Through**                                          |
+| **Screenshots placeholders**            | See below ⤵                                                                                  |
+| **Optional `output.json`**              | Backtester auto‑writes `report_YYYYMMDD_HHMMSS.json`; upload as `output.json` if preferred   |
+
+### 📸 Screenshot Placeholders
+
+Replace the image paths once you capture screenshots on EC2:
+
+```markdown
+![Kafka & Backtest on EC2](docs/screenshots/kafka_backtest_running.png)
+![stdout JSON](docs/screenshots/stdout_json.png)
+![uname‑a + uptime](docs/screenshots/uname_uptime.png)
+```
+
+> **Tip:** Store screenshots under `docs/screenshots/` so GitHub renders them automatically.
+
+---
+
 ## 1  Repository Layout
 
 ```
