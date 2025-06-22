@@ -384,7 +384,7 @@ no liability warranty.
 
 ## 16  Contact & Support
 
-* **Maintainer:** `<Your Name>` (<you>@example.com)
+* **Maintainer:** `John Riley` (john.p.riley00@gmail.com)
 * **Issues:** GitHub Issues tab – please provide OS, Python and Kafka versions.
 * **Pull Requests:** welcome!  Ensure `pytest` & `ruff` pass.
 
