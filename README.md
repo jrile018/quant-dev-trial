@@ -39,13 +39,9 @@ No proprietary libraries, no hidden dependencies, and no third‑party SaaS.
 
 ### 📸 Screenshot Placeholders
 
-Replace the image paths once you capture screenshots on EC2:
+![image](https://github.com/user-attachments/assets/7e402feb-7dc4-4d1d-8ae9-30d3d09c72a4)
+![image](https://github.com/user-attachments/assets/c3c2cfc4-2816-4899-9d95-7a60a3c2106c)
 
-```markdown
-![Kafka & Backtest on EC2](docs/screenshots/kafka_backtest_running.png)
-![stdout JSON](docs/screenshots/stdout_json.png)
-![uname‑a + uptime](docs/screenshots/uname_uptime.png)
-```
 
 > **Tip:** Store screenshots under `docs/screenshots/` so GitHub renders them automatically.
 
