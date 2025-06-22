@@ -1,5 +1,3 @@
-# kafka_producer.py
-
 import json
 import time
 from kafka import KafkaProducer

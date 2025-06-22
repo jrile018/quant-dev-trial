@@ -4,7 +4,7 @@ import json
 import time
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import hashlib
 import pickle
 import os
@@ -1411,7 +1411,7 @@ def load_or_generate_snapshots(use_kafka=True, max_snapshots=60, csv_file=None, 
     # Kafka consumer setup
     consumer = KafkaConsumer(
         'mock_l1_stream',
-        bootstrap_servers='localhost:9092',
+        bootstrap_servers='127.0.0.1:9092',
         value_deserializer=lambda m: json.loads(m.decode('utf-8')),
         auto_offset_reset='earliest',
         enable_auto_commit=True
@@ -1508,106 +1508,87 @@ def run_optimizer_with_cached_baselines(snapshots, max_shares, max_evals=50):
 
 # Main execution with enhanced multi-strategy testing
 if __name__ == "__main__":
-    start_time = time.time()
-    
-    # Parse command line arguments
     args = parse_arguments()
-    
-    print("=" * 60)
-    print("🚀 MULTI-STRATEGY TRADING ALGORITHM BACKTESTER")
-    print("=" * 60)
-    print("✅ Testing multiple strategies simultaneously")
-    print("✅ Grid Search (deterministic)")
-    print("✅ Enhanced Adam Optimizer (stochastic)")
-    print("✅ Volatility-Aware Allocator (adaptive)")
-    print("✅ Ensemble Meta-Strategy (hybrid)")
-    print("✅ Baseline controls (unchanged)")
-    
-    # Configure execution based on time limit
+
     if args.max_time:
         config = configure_execution_for_time_limit(args.max_time, args.csv)
-        print(f"\n⏰ Time limit: {args.max_time}s")
-        print(f"📊 {config['msg']}")
-        
         num_snapshots = config['snapshots']
         max_evals = config['max_evals']
         use_kafka = config['use_kafka'] and not args.mock and not args.csv
         sample_rate = config['sample_rate']
     else:
-        print(f"\n🏆 No time limit - using {'CSV' if args.csv else 'full Kafka'} mode")
         num_snapshots = args.snapshots
         max_evals = args.max_evals
         use_kafka = not args.mock and not args.csv
         sample_rate = args.sample_rate
-    
-    print(f"\n📋 Configuration:")
-    print(f"   Snapshots: {num_snapshots}")
-    print(f"   Max evaluations per strategy: {max_evals}")
-    if args.csv:
-        print(f"   Data source: CSV ({args.csv}, sample rate: {sample_rate})")
-    else:
-        print(f"   Data source: {'Kafka' if use_kafka else 'Mock'}")
-    print(f"   Verbose: {args.verbose}")
-    
+
     max_shares = 5000
-    
-    print("\n" + "=" * 60)
-    print("📈 STARTING MULTI-STRATEGY BACKTEST")
-    print("=" * 60)
-    
-    # Load or generate snapshots
     snapshots = load_or_generate_snapshots(use_kafka, num_snapshots, args.csv, sample_rate)
-    
+
     if len(snapshots) == 0:
-        print("❌ No snapshots collected! Check Kafka or use --mock flag")
         sys.exit(1)
-    
-    # Run comprehensive multi-strategy optimization
+
     report = run_optimizer_with_cached_baselines(snapshots, max_shares, max_evals)
-    
-    # Display execution time
-    elapsed_time = time.time() - start_time
-    print(f"\n⏱️  Total execution time: {elapsed_time:.2f}s")
-    
-    if args.max_time and elapsed_time > args.max_time:
-        print(f"⚠️  Exceeded time limit by {elapsed_time - args.max_time:.2f}s")
-    elif args.max_time:
-        print(f"✅ Completed within time limit ({args.max_time - elapsed_time:.2f}s remaining)")
-    
-    # Enhanced performance summary
-    if report and 'best_strategy' in report and report['best_strategy']:
-        best_strategy = report['best_strategy']
-        best_performance = report['best_performance']
-        
-        print(f"\n🏆 FINAL WINNER: {best_strategy.replace('_', ' ').title()}")
-        print(f"   Average Price: ${best_performance['avg_fill_px']:.4f}")
-        print(f"   Total Cost: ${best_performance['total_cash']:,.2f}")
-        print(f"   Shares Filled: {best_performance['filled']:,}")
-        
-        # Check if winner is a new strategy (not baseline)
-        if not best_strategy.startswith('baseline_'):
-            print("🎉 NEW STRATEGY WINS! Your algorithm beats the baselines!")
-            
-            # Calculate improvement vs best baseline
-            baseline_performances = [data['performance']['avg_fill_px'] 
-                                   for name, data in report['baseline_results'].items()]
-            if baseline_performances:
-                best_baseline_price = min(baseline_performances)
-                improvement_bps = (best_baseline_price - best_performance['avg_fill_px']) / best_baseline_price * 10000
-                print(f"💰 Improvement: {improvement_bps:.1f} bps better than best baseline")
-        else:
-            print("📊 Baseline strategy wins - optimization opportunity remains!")
+
+        # ------------------------------------------------------------------
+    # Build & print the final JSON summary
+    # ------------------------------------------------------------------
+        # pick the best *non-baseline* strategy
+    for cand_name, cand_px in sorted(report["strategy_rankings"], key=lambda x: x[1]):
+        if cand_name in report["strategy_results"]:
+            best_name = cand_name
+            break
     else:
-        print("❌ No valid results generated")
-    
-    # Strategy recommendations
-    print(f"\n💡 Recommendations:")
-    if elapsed_time < 30:
-        print("   - Try longer optimization: --max-time 120")
-        print("   - Increase evaluations: --max-evals 100")
-    
-    print("   - Stochastic strategies account for market volatility")
-    print("   - Ensemble methods combine multiple approaches")
-    print("   - Adaptive optimizers learn from market patterns")
-    
-    print("\n" + "=" * 60)
+        # fallback – should never happen
+        best_name = next(iter(report["strategy_results"]))
+
+
+    # grab the optimiser entry (may be grid_search / ensemble_meta / etc.)
+    opt_data = report["strategy_results"][best_name]
+
+    # convenience shorthands
+    opt_perf  = opt_data["performance"]
+    baselines = report["baseline_results"]
+
+    output_json = {
+        "best_parameters": {
+            "lambda_over":  round(opt_data["params"][0], 6)
+                            if opt_data.get("params") else None,
+            "lambda_under": round(opt_data["params"][1], 6)
+                            if opt_data.get("params") else None,
+            "theta_queue":  round(opt_data["params"][2], 6)
+                            if opt_data.get("params") else None
+        },
+        "optimized": {
+            "total_cash":  round(opt_perf["total_cash"]),
+            "avg_fill_px": round(opt_perf["avg_fill_px"], 2)
+        },
+        "baselines": {
+            "best_ask": {
+                "total_cash": round(baselines["naive_best_ask"]["total_cash"]),
+                "avg_fill_px": round(baselines["naive_best_ask"]["avg_fill_px"], 2)
+            },
+            "twap": {
+                "total_cash": round(baselines["twap"]["total_cash"]),
+                "avg_fill_px": round(baselines["twap"]["avg_fill_px"], 2)
+            },
+            "vwap": {
+                "total_cash": round(baselines["vwap"]["total_cash"]),
+                "avg_fill_px": round(baselines["vwap"]["avg_fill_px"], 2)
+            }
+        },
+        "savings_vs_baselines_bps": {}   # filled just below
+    }
+
+    px = output_json["optimized"]["avg_fill_px"]
+    b  = output_json["baselines"]
+    output_json["savings_vs_baselines_bps"] = {
+        "best_ask": round((b["best_ask"]["avg_fill_px"] - px)
+                          / b["best_ask"]["avg_fill_px"] * 10000, 2),
+        "twap":     round((b["twap"]["avg_fill_px"]      - px)
+                          / b["twap"]["avg_fill_px"]      * 10000, 2),
+        "vwap":     round((b["vwap"]["avg_fill_px"]      - px)
+                          / b["vwap"]["avg_fill_px"]      * 10000, 2)
+    }
+
+    print(json.dumps(output_json, indent=2))
