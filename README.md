@@ -1,7 +1,7 @@
 # Blockhouse Quant Developer Work‑Trial — **Deep‑Dive README**
 
 <sub>Version 2 — last updated 2025‑06‑21</sub>
-
+https://youtu.be/K-fVZs5b15E
 ---
 
 ## 0  Executive Summary
